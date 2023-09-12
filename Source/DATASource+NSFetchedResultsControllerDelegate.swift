@@ -5,7 +5,8 @@ extension DATASource: NSFetchedResultsControllerDelegate {
 
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         if let tableView = self.tableView {
-            tableView.beginUpdates()
+            //Ziming: Fix don't user dynamic updating, because this library is causing issues
+            //tableView.beginUpdates()
         } else if let _ = self.collectionView {
             self.sectionChanges = [NSFetchedResultsChangeType: IndexSet]()
             self.objectChanges = [NSFetchedResultsChangeType: Set<IndexPath>]()
@@ -54,13 +55,15 @@ extension DATASource: NSFetchedResultsControllerDelegate {
             switch type {
             case .insert:
                 if let newIndexPath = newIndexPath, let anObject = anObject as? NSManagedObject {
-                    tableView.insertRows(at: [newIndexPath], with: rowAnimationType)
+                    //Fix don't user dynamic updating, because this library is causing issues
+//                    tableView.insertRows(at: [newIndexPath], with: rowAnimationType)
                     self.delegate?.dataSource?(self, didInsertObject: anObject, atIndexPath: newIndexPath)
                 }
                 break
             case .delete:
                 if let indexPath = indexPath, let anObject = anObject as? NSManagedObject {
-                    tableView.deleteRows(at: [indexPath], with: rowAnimationType)
+                    //Fix don't user dynamic updating, because this library is causing issues
+//                    tableView.deleteRows(at: [indexPath], with: rowAnimationType)
                     self.delegate?.dataSource?(self, didDeleteObject: anObject, atIndexPath: indexPath)
                 }
                 break
@@ -82,8 +85,9 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                 break
             case .move:
                 if let indexPath = indexPath, let newIndexPath = newIndexPath {
-                    tableView.deleteRows(at: [indexPath], with: rowAnimationType)
-                    tableView.insertRows(at: [newIndexPath], with: rowAnimationType)
+                    //Fix don't user dynamic updating, because this library is causing issues
+//                    tableView.deleteRows(at: [indexPath], with: rowAnimationType)
+//                    tableView.insertRows(at: [newIndexPath], with: rowAnimationType)
 
                     if let anObject = anObject as? NSManagedObject {
                         self.delegate?.dataSource?(self, didMoveObject: anObject, fromIndexPath: indexPath, toIndexPath: newIndexPath)
@@ -93,6 +97,9 @@ extension DATASource: NSFetchedResultsControllerDelegate {
             @unknown default:
                 fatalError("Unknown NSFetchedResultsChangeType not implemented")
             }
+            
+            
+            
         } else if let _ = self.collectionView {
             var changeSet = self.objectChanges[type] ?? Set<IndexPath>()
 
@@ -132,7 +139,9 @@ extension DATASource: NSFetchedResultsControllerDelegate {
 
     public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         if let tableView = self.tableView {
-            tableView.endUpdates()
+            //Ziming: Use static reloadData instead
+            tableView.reloadData()
+            //tableView.endUpdates()
         } else if let _ = self.collectionView {
             if let moves = self.objectChanges[.move] {
                 if moves.count > 0 {
@@ -174,6 +183,8 @@ extension DATASource: NSFetchedResultsControllerDelegate {
             }
 
             if let collectionView = self.collectionView {
+                collectionView.reloadData()
+                /*
                 collectionView.performBatchUpdates({
                     if let deletedSections = self.sectionChanges[.delete] {
                         collectionView.deleteSections(deletedSections as IndexSet)
@@ -203,6 +214,7 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                     }
 
                 }, completion: nil)
+                 */
             }
         }
         self.delegate?.dataSourceDidChangeContent?(self)
