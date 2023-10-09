@@ -88,6 +88,8 @@ public class DATASource: NSObject {
     private weak var mainContext: NSManagedObjectContext?
     private var tableConfigurationBlock: ((_ cell: UITableViewCell, _ item: NSManagedObject, _ indexPath: IndexPath) -> ())?
     private var collectionConfigurationBlock: ((_ cell: UICollectionViewCell, _ item: NSManagedObject, _ indexPath: IndexPath) -> ())?
+    
+    public var allowCellOperation: Bool = true
 
     /**
      The DATASource's delegate. Used for overwritting methods overwritten by DATASource. Also used to be notified of object changes.
@@ -311,6 +313,9 @@ public class DATASource: NSObject {
      - parameter indexPaths: The array of indexPaths to be reloaded.
      */
     @objc public func reloadCells(at indexPaths: [IndexPath]) {
+        if !self.allowCellOperation {
+            return
+        }
         for indexPath in indexPaths {
             if let tableView = self.tableView {
                 if let cell = tableView.cellForRow(at: indexPath) {
