@@ -4,15 +4,10 @@ import CoreData
 extension DATASource: NSFetchedResultsControllerDelegate {
 
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-//        if let tableView = self.tableView {
-//            tableView.beginUpdates()
-//        } else if let _ = self.collectionView {
-//            self.sectionChanges = [NSFetchedResultsChangeType: IndexSet]()
-//            self.objectChanges = [NSFetchedResultsChangeType: Set<IndexPath>]()
-//        }
-
-        //Ziming: Fix don't user dynamic updating, because this library is causing issues
-        if let _ = self.collectionView {
+        if let tableView = self.tableView {
+            //Ziming: Fix don't user dynamic updating, because this library is causing issues
+            //tableView.beginUpdates()
+        } else if let _ = self.collectionView {
             self.sectionChanges = [NSFetchedResultsChangeType: IndexSet]()
             self.objectChanges = [NSFetchedResultsChangeType: Set<IndexPath>]()
         }
@@ -56,7 +51,7 @@ extension DATASource: NSFetchedResultsControllerDelegate {
 
     public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         if let tableView = self.tableView {
-//            let rowAnimationType = self.animations?[type] ?? .automatic
+            let rowAnimationType = self.animations?[type] ?? .automatic
             switch type {
             case .insert:
                 if let newIndexPath = newIndexPath, let anObject = anObject as? NSManagedObject {
@@ -78,8 +73,10 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                         fallthrough
                     }
                     if tableView.indexPathsForVisibleRows?.firstIndex(of: newIndexPath) != nil {
-                        if let cell = tableView.cellForRow(at: newIndexPath) {
-                            self.configure(cell, indexPath: newIndexPath)
+                        if self.allowCellOperation {
+                            if let cell = tableView.cellForRow(at: newIndexPath) {
+                                self.configure(cell, indexPath: newIndexPath)
+                            }
                         }
 
                         if let anObject = anObject as? NSManagedObject {
